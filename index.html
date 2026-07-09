@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
   <title>HQ ICON</title>
@@ -10,10 +10,52 @@
   <link rel="preconnect" href="https://cdn-font.hyperos.mi.com" crossorigin />
   <link rel="stylesheet"
     href="https://cdn-font.hyperos.mi.com/font/css?family=MiSans_VF:VF:Chinese_Simplify,Latin&display=swap">
+  
+  <style>
+    /* ICP 备案底部悬挂样式 */
+    .icp-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 12px;
+      color: #999;
+      font-family: 'MiSans_VF', sans-serif;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 9999; /* 确保不被 React 组件遮挡 */
+      box-sizing: border-box;
+    }
+    /* 适配深色模式 */
+    @media (prefers-color-scheme: dark) {
+      .icp-footer {
+        background: rgba(0, 0, 0, 0.8);
+        color: #666;
+      }
+      .icp-footer a {
+        color: #666 !important;
+      }
+    }
+    .icp-footer a {
+      color: #999;
+      text-decoration: none;
+    }
+    .icp-footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 
 <body>
   <div id="root"></div>
+  
+  <!-- ICP备案悬挂代码 -->
+  <footer class="icp-footer">
+    <a href="https://beian.miit.gov.cn/" target="_blank">蜀ICP备2026038136号</a>
+  </footer>
+
   <script type="module" src="/src/index.jsx"></script>
 </body>
 
