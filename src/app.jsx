@@ -1,8 +1,10 @@
 import { Component } from "react";
+
 import Result from "./result.jsx";
 import FilterGroup from "./FilterGroup.jsx";
 import { searchApp } from "./searchApp.jsx";
 import { getUrlArgs } from "./url.jsx";
+
 import "./app.css";
 
 const getSystemLang = () =>
@@ -64,6 +66,7 @@ const ENTITY_MAPS = [
   { key: "entity", value: "iPadSoftware", text: "iPadOS" },
   { key: "entity", value: "desktopSoftware", text: "macOS" },
 ];
+
 const COUNTRY_MAPS = [
   { key: "country", value: "cn", text: "CN" },
   { key: "country", value: "us", text: "US" },
@@ -90,16 +93,19 @@ const COUNTRY_MAPS = [
   { key: "country", value: "mx", text: "MX" },
   { key: "country", value: "my", text: "MY" },
 ];
+
 const FORMAT_MAPS = [
   { key: "format", value: "jpeg", text: "JPEG" },
   { key: "format", value: "png", text: "PNG" },
   { key: "format", value: "webp", text: "WebP" },
 ];
+
 const RESOLUTION_MAPS = [
   { key: "resolution", value: "256", text: "256px" },
   { key: "resolution", value: "512", text: "512px" },
   { key: "resolution", value: "1024", text: "1024px" },
 ];
+
 const LIMIT_MAPS = [
   { key: "limit", value: "6", text: "6" },
   { key: "limit", value: "18", text: "18" },
@@ -166,6 +172,9 @@ class App extends Component {
 
     if (this.state.name) {
       this.search();
+    } else {
+      // 新增：没有搜索词时，自动使用默认关键词搜索并展示图标
+      this.autoLoadDefaultIcons();
     }
   }
 
@@ -176,6 +185,34 @@ class App extends Component {
     );
     document.removeEventListener("mousemove", this.handleDocumentMouseMove);
     document.removeEventListener("mouseup", this.handleDocumentMouseUp);
+  }
+
+  // 新增方法：自动加载默认图标
+  async autoLoadDefaultIcons() {
+    const { country, entity, limit } = this.state;
+    const defaultKeyword = "app";
+
+    this.setState({ isSearching: true });
+
+    try {
+      const data = await searchApp(defaultKeyword, country, entity, limit);
+      const limitedResults = data.results.slice(0, parseInt(limit, 10));
+
+      this.setState({
+        results: limitedResults,
+        isSearching: false,
+        hasSearched: true,
+        name: "", // 保持搜索框为空
+      });
+    } catch (err) {
+      console.error("Error loading default icons:", err);
+      this.setState({
+        results: [],
+        isSearching: false,
+        hasSearched: true,
+        name: "",
+      });
+    }
   }
 
   applyTheme = (theme) => {
@@ -240,17 +277,20 @@ class App extends Component {
     const { name, country, entity, limit, cut, resolution, format } =
       this.state;
     const trimmedName = name.trim();
+
     if (!trimmedName) {
       this.setState({ results: [], hasSearched: false });
       const cleanUrl = window.location.href.split("?")[0];
-      history.replaceState(null, null, cleanUrl);
+      history.replaceState(null, "", cleanUrl);
       return;
     }
 
     this.setState({ isSearching: true });
+
     try {
       const data = await searchApp(trimmedName, country, entity, limit);
       const limitedResults = data.results.slice(0, parseInt(limit, 10));
+
       this.setState({
         results: limitedResults,
         isSearching: false,
@@ -265,7 +305,7 @@ class App extends Component {
       currentUrl.searchParams.set("cut", cut);
       currentUrl.searchParams.set("resolution", resolution);
       currentUrl.searchParams.set("format", format);
-      history.replaceState(null, null, currentUrl.toString());
+      history.replaceState(null, "", currentUrl.toString());
     } catch (err) {
       console.error("Error:", err);
       this.setState({ results: [], isSearching: false, hasSearched: true });
@@ -279,7 +319,6 @@ class App extends Component {
     this.startX = event.pageX - el.offsetLeft;
     this.scrollLeftStart = el.scrollLeft;
     el.classList.add("grabbing");
-
     document.addEventListener("mousemove", this.handleDocumentMouseMove);
     document.addEventListener("mouseup", this.handleDocumentMouseUp);
     event.preventDefault();
@@ -300,7 +339,6 @@ class App extends Component {
       this.draggedElement.classList.remove("grabbing");
     }
     this.draggedElement = null;
-
     document.removeEventListener("mousemove", this.handleDocumentMouseMove);
     document.removeEventListener("mouseup", this.handleDocumentMouseUp);
   };
@@ -332,225 +370,211 @@ class App extends Component {
     return (
       <div className="app">
         <header>
-          <div className="center">
-            <div className="header-content">
-              <div className="branding">
-                <div className="logo">{t.title}</div>
-                <div className="description">{t.description}</div>
-              </div>
-              <div className="header-right">
-                <div
-                  className={`header-controls ${isControlsVisible ? "show" : ""}`}
-                >
-                  <div className="lang-toggle">
-                    <span
-                      className="toggle-slider"
-                      style={{
-                        "--active-index":
-                          language === "zh" ? 0 : language === "system" ? 1 : 2,
-                      }}
-                    />
-                    <button
-                      className={`theme-btn ${language === "zh" ? "active" : ""}`}
-                      onClick={() => this.toggleLanguage("zh")}
-                    >
-                      中文
-                    </button>
-                    <button
-                      className={`theme-btn ${language === "system" ? "active" : ""}`}
-                      onClick={() => this.toggleLanguage("system")}
-                    >
-                      {t.themeSystem}
-                    </button>
-                    <button
-                      className={`theme-btn ${language === "en" ? "active" : ""}`}
-                      onClick={() => this.toggleLanguage("en")}
-                    >
-                      EN
-                    </button>
-                  </div>
-                  <div className="theme-toggle">
-                    <span
-                      className="toggle-slider"
-                      style={{
-                        "--active-index":
-                          theme === "light" ? 0 : theme === "system" ? 1 : 2,
-                      }}
-                    />
-                    <button
-                      className={`theme-btn ${theme === "light" ? "active" : ""}`}
-                      onClick={() => this.toggleTheme("light")}
-                    >
-                      {t.themeLight}
-                    </button>
-                    <button
-                      className={`theme-btn ${theme === "system" ? "active" : ""}`}
-                      onClick={() => this.toggleTheme("system")}
-                    >
-                      {t.themeSystem}
-                    </button>
-                    <button
-                      className={`theme-btn ${theme === "dark" ? "active" : ""}`}
-                      onClick={() => this.toggleTheme("dark")}
-                    >
-                      {t.themeDark}
-                    </button>
-                  </div>
+          <div className="header-top">
+            <h1>{t.title}</h1>
+            <p className="description">{t.description}</p>
+            <div className="header-controls">
+              <button
+                className="theme-toggle"
+                onClick={this.toggleControls}
+                title={t.langToggle}
+              >
+                ⚙
+              </button>
+              <button
+                className="lang-toggle"
+                onClick={() =>
+                  this.toggleLanguage(
+                    (language === "system" ? currentLang : language) === "zh"
+                      ? "en"
+                      : "zh",
+                  )
+                }
+                title={t.langToggle}
+              >
+                {(language === "system" ? currentLang : language).toUpperCase()}
+              </button>
+            </div>
+          </div>
+
+          {isControlsVisible && (
+            <div className="controls-panel">
+              <div className="control-group">
+                <label>{t.themeLight}</label>
+                <div className="theme-buttons">
                   <button
-                    className={`expand-controls ${isControlsVisible ? "active" : ""}`}
-                    onClick={this.toggleControls}
-                    aria-label="Toggle controls"
-                  />
-                </div>
-                <div className="search">
-                  <input
-                    className="search-input"
-                    placeholder={t.searchPlaceholder}
-                    value={name}
-                    onChange={(e) => this.setState({ name: e.target.value })}
-                    onKeyDown={(e) =>
-                      e.key === "Enter" ? this.search() : null
-                    }
-                  />
-                  <button className="search-button" onClick={this.search}>
-                    <div className="search-icon" />
+                    className={theme === "light" ? "active" : ""}
+                    onClick={() => this.toggleTheme("light")}
+                  >
+                    {t.themeLight}
+                  </button>
+                  <button
+                    className={theme === "dark" ? "active" : ""}
+                    onClick={() => this.toggleTheme("dark")}
+                  >
+                    {t.themeDark}
+                  </button>
+                  <button
+                    className={theme === "system" ? "active" : ""}
+                    onClick={() => this.toggleTheme("system")}
+                  >
+                    {t.themeSystem}
                   </button>
                 </div>
               </div>
             </div>
-            <div className="filters-container">
-              <button
-                className={`filters-toggle ${isFiltersVisible ? "active" : ""}`}
-                onClick={this.toggleFilters}
-              >
-                {t.filterToggle}
-              </button>
-              <div className={`filters ${isFiltersVisible ? "show" : ""}`}>
-                <div className="filters-inner">
-                  <FilterGroup
-                    title={t.queryType}
-                    options={ENTITY_MAPS}
-                    currentValue={this.state.entity}
-                    onChange={(option) => {
-                      const newState = { entity: option.value };
-                      if (option.value === "desktopSoftware") {
-                        newState.cut = "0";
-                      } else if (this.state.entity === "desktopSoftware") {
-                        newState.cut = this.state.mobileCut;
-                      }
-                      this.setState(newState, this.search);
-                    }}
-                    onMouseDown={this.handleFilterOptionsMouseDown}
-                  />
-                  <FilterGroup
-                    title={t.queryCount}
-                    options={LIMIT_MAPS}
-                    currentValue={this.state.limit}
-                    onChange={(option) =>
-                      this.handleFilterChange(option, this.search)
+          )}
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              this.search();
+            }}
+            className="search-form"
+          >
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => this.setState({ name: e.target.value })}
+              placeholder={t.searchPlaceholder}
+              className="search-input"
+              autoFocus
+            />
+            <button type="submit" className="search-button" disabled={isSearching}>
+              {isSearching ? "..." : "🔍"}
+            </button>
+          </form>
+
+          <button
+            className="filter-toggle"
+            onClick={this.toggleFilters}
+          >
+            {t.filterToggle} {isFiltersVisible ? "▲" : "▼"}
+          </button>
+
+          {isFiltersVisible && (
+            <div className="filters">
+              <FilterGroup
+                title={t.queryType}
+                options={ENTITY_MAPS}
+                currentValue={this.state.entity}
+                onChange={(option) =>
+                  this.handleFilterChange(option, () => {
+                    if (this.state.name) {
+                      this.search();
                     }
-                    onMouseDown={this.handleFilterOptionsMouseDown}
-                  />
-                  <FilterGroup
-                    title={t.region}
-                    options={COUNTRY_MAPS}
-                    currentValue={this.state.country}
-                    onChange={(option) =>
-                      this.handleFilterChange(option, this.search)
+                  })
+                }
+                onMouseDown={this.handleFilterOptionsMouseDown}
+              />
+
+              <FilterGroup
+                title={t.queryCount}
+                options={LIMIT_MAPS}
+                currentValue={this.state.limit}
+                onChange={(option) =>
+                  this.handleFilterChange(option, () => {
+                    if (this.state.name) {
+                      this.search();
                     }
-                    onMouseDown={this.handleFilterOptionsMouseDown}
-                  />
-                  <FilterGroup
-                    title={t.cutMode}
-                    options={cutMaps}
-                    currentValue={this.state.cut}
-                    onChange={(option) => {
-                      const newState = { cut: option.value };
-                      if (this.state.entity !== "desktopSoftware") {
-                        newState.mobileCut = option.value;
-                      }
-                      this.setState(newState);
-                    }}
-                    disabledValues={disabledCutValues}
-                    onMouseDown={this.handleFilterOptionsMouseDown}
-                  />
-                  <FilterGroup
-                    title={t.imageFormat}
-                    options={FORMAT_MAPS}
-                    currentValue={this.state.format}
-                    onChange={(option) => this.handleFilterChange(option)}
-                    onMouseDown={this.handleFilterOptionsMouseDown}
-                  />
-                  <FilterGroup
-                    title={t.imageSize}
-                    options={RESOLUTION_MAPS}
-                    currentValue={this.state.resolution}
-                    onChange={(option) => this.handleFilterChange(option)}
-                    onMouseDown={this.handleFilterOptionsMouseDown}
-                  />
-                </div>
-              </div>
+                  })
+                }
+                onMouseDown={this.handleFilterOptionsMouseDown}
+              />
+
+              <FilterGroup
+                title={t.region}
+                options={COUNTRY_MAPS}
+                currentValue={this.state.country}
+                onChange={(option) =>
+                  this.handleFilterChange(option, () => {
+                    if (this.state.name) {
+                      this.search();
+                    }
+                  })
+                }
+                onMouseDown={this.handleFilterOptionsMouseDown}
+              />
+
+              <FilterGroup
+                title={t.cutMode}
+                options={cutMaps}
+                currentValue={cut}
+                disabledValues={disabledCutValues}
+                onChange={(option) =>
+                  this.handleFilterChange(option, () => {
+                    if (this.state.name) {
+                      this.search();
+                    }
+                  })
+                }
+                onMouseDown={this.handleFilterOptionsMouseDown}
+              />
+
+              <FilterGroup
+                title={t.imageFormat}
+                options={FORMAT_MAPS}
+                currentValue={format}
+                onChange={(option) =>
+                  this.handleFilterChange(option, () => {
+                    if (this.state.name) {
+                      this.search();
+                    }
+                  })
+                }
+                onMouseDown={this.handleFilterOptionsMouseDown}
+              />
+
+              <FilterGroup
+                title={t.imageSize}
+                options={RESOLUTION_MAPS}
+                currentValue={resolution}
+                onChange={(option) =>
+                  this.handleFilterChange(option, () => {
+                    if (this.state.name) {
+                      this.search();
+                    }
+                  })
+                }
+                onMouseDown={this.handleFilterOptionsMouseDown}
+              />
             </div>
-          </div>
+          )}
         </header>
+
         <main className="results">
           {isSearching ? (
-            Array.from({ length: parseInt(this.state.limit, 10) }, (_, i) => (
-              <div className="result skeleton" key={i}>
-                <div className="icon-wrapper" />
-                <div className="info">
-                  <div className="skeleton-line skeleton-title" />
-                  <div className="skeleton-line skeleton-artist" />
-                  <div className="skeleton-line skeleton-platform" />
-                </div>
-              </div>
-            ))
-          ) : results.length > 0 ? (
+            <div className="loading">...</div>
+          ) : hasSearched && results.length === 0 ? (
+            <div className="no-results">
+              <p>{t.noResults}</p>
+              <p className="proxy-warning">{t.proxyWarning}</p>
+            </div>
+          ) : (
             results.map((result) => (
               <Result
                 key={result.trackId}
-                data={result}
-                cut={cut}
+                result={result}
                 resolution={resolution}
                 format={format}
+                cut={this.state.entity === "desktopSoftware" ? "0" : cut}
+                mobileCut={
+                  this.state.entity === "desktopSoftware" ? "2" : this.state.mobileCut
+                }
               />
             ))
-          ) : hasSearched ? (
-            <div className="no-results">
-              <div>{t.noResults}</div>
-              <div className="proxy-warning">{t.proxyWarning}</div>
-              {isAndroid && (
-                <div className="android-warning">
-                  {t.androidWarning}
-                  <a
-                    href="https://github.com/YuKongA/HQ-ICON_Compose/releases"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {t.androidAppLink}
-                  </a>
-                </div>
-              )}
-            </div>
-          ) : null}
+          )}
         </main>
+
         <footer>
-          <div className="center">
-            <div className="footer-content">
-              <div className="copyright">
-                Copyright © 2024 - 2026{" "}
-                <a href="https://github.com/YuKongA">YuKongA</a>
-              </div>
-              <a
-                href="https://github.com/YuKongA/HQ-ICON"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="github-link"
-              >
-                GitHub
+          {isAndroid && (
+            <p className="android-notice">
+              {t.androidWarning}{" "}
+              <a href="https://github.com/Carolove7/HQ-ICON/releases">
+                {t.androidAppLink}
               </a>
-            </div>
-          </div>
+            </p>
+          )}
         </footer>
       </div>
     );
