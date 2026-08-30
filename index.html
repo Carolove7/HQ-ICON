@@ -45,6 +45,12 @@
     .icp-footer a:hover {
       text-decoration: underline;
     }
+    /* 为固定备案栏让出空间，避免遮挡 React 渲染的 Copyright 页脚 */
+    /* 备案栏高度约 37px（上下 padding 20px + 12px 字号行高），
+       额外留出余量；#root 提升优先级以覆盖 app.css 中的 footer 规则 */
+    #root footer {
+      padding-bottom: calc(2.5rem + 46px + env(safe-area-inset-bottom, 0px));
+    }
   </style>
 </head>
 
