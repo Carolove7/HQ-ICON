@@ -451,6 +451,17 @@ footer {
   opacity: 0.7;
 }
 
+.icp-link {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.icp-link:hover {
+  opacity: 0.7;
+}
+
 .github-link {
   height: 32px;
   padding: 0 12px;
@@ -590,6 +601,10 @@ footer {
   }
 
   .copyright {
+    font-size: 0.8rem;
+  }
+
+  .icp-link {
     font-size: 0.8rem;
   }
 

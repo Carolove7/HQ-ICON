@@ -536,20 +536,28 @@ class App extends Component {
         </main>
         <footer>
           <div className="center">
-            <div className="footer-content">
-              <div className="copyright">
-                Copyright © 2024 - 2026{" "}
-                <a href="https://github.com/YuKongA">YuKongA</a>
+              <div className="footer-content">
+                <div className="copyright">
+                  Copyright © 2024 - 2026{" "}
+                  <a href="https://github.com/YuKongA">YuKongA</a>
+                </div>
+                <a
+                  href="https://beian.miit.gov.cn/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="icp-link"
+                >
+                  蜀ICP备2026038136号
+                </a>
+                <a
+                  href="https://github.com/YuKongA/HQ-ICON"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="github-link"
+                >
+                  GitHub
+                </a>
               </div>
-              <a
-                href="https://github.com/YuKongA/HQ-ICON"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="github-link"
-              >
-                GitHub
-              </a>
-            </div>
           </div>
         </footer>
       </div>
