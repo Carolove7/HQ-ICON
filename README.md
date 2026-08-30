@@ -2,13 +2,11 @@
 
 ### 网址：
 
-我自己的域名：https://icon.yukonga.top/
-
-GitHub Page：https://yukonga.github.io/HQ-ICON/
+我自己的域名：https://www.147771.xyz
 
 ### 使用：
 
-完整例子: https://icon.yukonga.top/?name=Google&country=us&entity=software&limit=18&cut=2&resolution=1024&format=webp
+完整例子: https://www.147771.xyz/?name=Google&country=us&entity=software&limit=18&cut=2&resolution=1024&format=webp
 
 ### 参数：
 
